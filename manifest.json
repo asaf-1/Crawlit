@@ -1,0 +1,26 @@
+{
+  "manifest_version": 3,
+  "name": "Crawlit",
+  "description": "Scan a page or crawl a site to find downloadable files, download them, and export results to CSV.",
+  "version": "1.2.2",
+  "action": {
+    "default_popup": "popup.html"
+  },
+  "permissions": ["storage", "downloads", "tabs"],
+  "host_permissions": ["<all_urls>"],
+  "background": {
+    "service_worker": "sw.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content.js"],
+      "run_at": "document_idle"
+    }
+  ],
+  "icons": {
+  "16": "Icon/icon16.png",
+  "48": "Icon/icon48.png",
+  "128": "Icon/icon128.png"
+}
+}

@@ -1,0 +1,231 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>Universal Downloader</title>
+  <style>
+    :root{
+      --bg:#ffffff;
+      --card:#f7f7f9;
+      --border:#d9d9e3;
+      --text:#111827;
+      --muted:#6b7280;
+
+      /* Buttons */
+      --btnBg:#111827;          /* uniform base */
+      --btnText:#ffffff;
+      --btnHover:#0b1220;
+
+      /* Active (running) */
+      --activeBg:#2563eb;       /* blue "ON" */
+      --activeText:#ffffff;
+
+      /* Stop (still uniform, but a red border) */
+      --stopBorder:#ef4444;
+
+      --shadow: 0 6px 20px rgba(0,0,0,.08);
+      --radius:12px;
+    }
+
+    *{ box-sizing:border-box; }
+    body{
+      margin:10px;
+      width: 350px;
+      font-family: Arial, sans-serif;
+      color: var(--text);
+      background: var(--bg);
+    }
+
+    .header{ margin-bottom:10px; }
+    .title{ font-size:14px; font-weight:700; }
+    .subtitle{ font-size:11px; color: var(--muted); margin-top:2px; }
+
+    .card{
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 10px;
+      box-shadow: var(--shadow);
+    }
+
+    .grid{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap:10px;
+    }
+    .full{ grid-column: 1 / -1; }
+
+    label{
+      display:block;
+      font-size:11px;
+      color: var(--muted);
+      margin: 2px 0 6px;
+      user-select:none;
+    }
+
+    input[type="text"],
+    input[type="number"]{
+      width:100%;
+      padding:8px 9px;
+      border:1px solid var(--border);
+      border-radius:10px;
+      outline:none;
+      background:#fff;
+      font-size:12px;
+      line-height: 16px;
+    }
+    input[type="text"]:focus,
+    input[type="number"]:focus{
+      border-color:#9ca3af;
+    }
+
+    .checks{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap:10px;
+      margin-top:6px;
+    }
+    .check{
+      display:flex;
+      align-items:center;
+      gap:8px;
+      font-size:12px;
+      color: var(--text);
+      padding:8px 10px;
+      border:1px solid var(--border);
+      border-radius:10px;
+      background:#fff;
+      height: 38px;
+    }
+    .check input{ margin:0; }
+
+    .hint{
+      font-size:11px;
+      color: var(--muted);
+      margin-top:8px;
+      line-height: 1.35;
+    }
+
+    .divider{
+      height:1px;
+      background: var(--border);
+      margin:10px 0;
+    }
+
+    .btnGrid{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap:10px;
+      margin-top:10px;
+    }
+
+    /* Uniform buttons */
+    button{
+      height: 40px;
+      border-radius:10px;
+      border:1px solid transparent;
+      cursor:pointer;
+      font-weight:700;
+      font-size:12px;
+      letter-spacing:.2px;
+      background: var(--btnBg);
+      color: var(--btnText);
+    }
+    button:hover{ background: var(--btnHover); }
+    button:active{ transform: translateY(1px); }
+
+    /* ON state (when actually running) */
+    button.is-active{
+      background: var(--activeBg) !important;
+      color: var(--activeText) !important;
+      box-shadow: 0 0 0 2px rgba(37,99,235,.25);
+    }
+
+    /* Stop stays uniform, but show red border so it's obvious */
+    #stop{
+      border: 1px solid var(--stopBorder);
+    }
+
+    /* Status area: fixed height + internal scroll so it never gets cut */
+    .status{
+      margin-top:10px;
+      border:1px solid var(--border);
+      border-radius:10px;
+      background:#fff;
+      padding:10px;
+      font-size:12px;
+      white-space:pre-wrap;
+      line-height: 1.35;
+      height: 155px;     /* <-- adjust if you want bigger */
+      overflow:auto;     /* <-- important */
+    }
+  </style>
+</head>
+
+<body>
+  <div class="header">
+    <div class="title">Universal Downloader</div>
+    <div class="subtitle">Scan a page or crawl a site for downloadable files</div>
+  </div>
+
+  <div class="card">
+    <div class="grid">
+      <div class="full">
+        <label for="fileTypes">File types (comma separated)</label>
+        <input id="fileTypes" type="text" value="pdf,zip,rar,7z,doc,docx,xls,xlsx,ppt,pptx,csv,json,xml" />
+      </div>
+
+      <div>
+        <label for="include">Include (substring or /regex/i)</label>
+        <input id="include" type="text" placeholder="optional" />
+      </div>
+
+      <div>
+        <label for="exclude">Exclude (substring or /regex/i)</label>
+        <input id="exclude" type="text" placeholder="optional" />
+      </div>
+
+      <div class="full">
+        <label for="folder">Subfolder inside Downloads</label>
+        <input id="folder" type="text" value="UniversalDownloader" />
+      </div>
+
+      <div>
+        <label for="maxPages">Max pages</label>
+        <input id="maxPages" type="number" value="200" />
+      </div>
+
+      <div>
+        <label for="maxDepth">Max depth</label>
+        <input id="maxDepth" type="number" value="2" />
+      </div>
+    </div>
+
+    <div class="checks">
+      <label class="check"><input id="sameOrigin" type="checkbox" checked /> Same-origin only</label>
+      <label class="check"><input id="hideTab" type="checkbox" /> Hide scan tab (minimized)</label>
+    </div>
+
+    <div class="hint">
+      “Hide scan tab” opens a minimized popup window. It’s not truly invisible, but usually not seen.
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="btnGrid">
+      <button id="scanPage">Scan current page</button>
+      <button id="crawlSite">Crawl site</button>
+
+      <button id="downloadScanned">Download scanned</button>
+      <button id="stop">Stop</button>
+
+      <button id="exportCsv">Export CSV</button>
+      <button id="clearResults">Clear</button>
+    </div>
+
+    <div class="status" id="status">idle</div>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>
